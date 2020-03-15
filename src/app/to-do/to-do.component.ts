@@ -7,9 +7,125 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ToDoComponent implements OnInit {
 
+  clear: HTMLElement;
+  dateElement: HTMLElement;
+  list: HTMLElement; 
+  input: HTMLElement;
+
+  CHECK = "fa-check-circle";
+  UNCHECK = "fa-circle-thin";
+  LINE_THROUGH = "lineThrough";
+
+  LIST = [];
+  id: number;
+  
   constructor() { }
 
+  data = localStorage.getItem("TODO");
+
   ngOnInit(): void {
+    
+    this.clear = document.querySelector(".clear");
+    this.dateElement = document.getElementById("date");
+    this.list = document.getElementById("list");
+    this.input = document.getElementById("input");
+
+    // show todays date
+    const options = { weekday: "long", month: "short", day: "numeric" };
+    const today = new Date();
+    this.dateElement.innerHTML = today.toLocaleDateString("en-UK", options);
+
+    if (this.data) {
+      this.LIST = JSON.parse(this.data);
+      this.id = this.LIST.length; // set the id to the last one in the list
+      this.loadList(this.LIST);
+    } else {
+      this.LIST = [];
+      this.id = 0;
+    }
+  }
+
+  // load the items into the user interface
+  loadList(array) {
+    array.forEach(function (item) {
+      this.addToDo(item.name, item.id, item.done, item.trash);
+    });
+  }
+
+  // called the button that looks like a refresh button (not the browser refresh button)
+  clearLocalStorage() {
+    localStorage.clear();
+    location.reload();
+  }
+
+  addToDo(toDo, id, done, trash) {
+
+    if (trash) {
+      return;
+    }
+
+    const DONE = done ? this.CHECK : this.UNCHECK;
+
+    const LINE = done ? this.LINE_THROUGH : "";
+
+    const text = `<li class="item">
+                     <i class="fa ${DONE} co" job="complete" id="${id}"></i>
+                     <p class="text ${LINE}">${toDo}</p>
+                     <i class="fa fa-trash-o de" job="delete" id="${id}"></i>
+                  </li>`;
+
+    const position = "beforeend";
+    // this.list.insertAdjacentHTML(position, text);
+  }
+
+  completeToDo(element) {
+    element.classList.toggle(this.CHECK);
+    element.classList.toggle(this.UNCHECK);
+    element.parentNode.querySelector(".text").classList.toggle(this.LINE_THROUGH);
+    this.LIST[element.id].done = this.LIST[element.id].done ? false : true;
+  }
+
+  removeToDo(element) {
+    element.parentNode.parentNode.removeChild(element.parentNode);
+    this.LIST[element.id].trash = true;
+  }
+
+  todoListControls() {
+    let element = event.target;
+    // to do: need to address this and check where it is called from
+    let elementJOB; //= element.attributes.job.value; // delete or complete
+
+    if (elementJOB == "complete") {
+      this.completeToDo(element);
+    } else if (elementJOB == "delete") {
+      this.removeToDo(element)
+    }
+    // add item to local storage
+    localStorage.setItem("TODO", JSON.stringify(this.LIST));
+  }
+
+
+  newTodoItem(event) {
+    if (event.keyCode == 13) {
+      // need to see why the code is complaining about input
+      const toDo = 1 // this.input.value;
+      // call addToDo if the input field has something in it...
+      if (toDo) {
+        this.addToDo(toDo, this.id, false, false);
+        this.LIST.push(
+          {
+            name: toDo,
+            id: this.id,
+            done: false,
+            trash: false
+          }
+        );
+        // add this item to local storage
+        localStorage.setItem("TODO", JSON.stringify(this.LIST));
+        this.id++;
+      }
+      // this.input.value = "";
+    }
   }
 
 }
