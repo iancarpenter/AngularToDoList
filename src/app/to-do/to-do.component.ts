@@ -50,9 +50,11 @@ export class ToDoComponent implements OnInit {
 
   // load the items into the user interface
   loadList(array) {
-    array.forEach(function (item) {
+    // see https://stackoverflow.com/q/43724426/55640  
+    array.forEach((item) => {      
       this.addToDo(item.name, item.id, item.done, item.trash);
     });
+    
   }
 
   // called the button that looks like a refresh button (not the browser refresh button)
@@ -73,7 +75,7 @@ export class ToDoComponent implements OnInit {
 
     const text = `<li class="item">
                      <i class="fa ${DONE} co" job="complete" id="${id}"></i>
-                     <p class="text ${LINE}">${toDo}</p>
+                     <p class="text ${LINE}"> ${toDo}</p>
                      <i class="fa fa-trash-o de" job="delete" id="${id}"></i>
                   </li>`;
 
