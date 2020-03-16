@@ -78,7 +78,7 @@ export class ToDoComponent implements OnInit {
                   </li>`;
 
     const position = "beforeend";
-    // this.list.insertAdjacentHTML(position, text);
+    this.list.insertAdjacentHTML(position, text);
   }
 
   completeToDo(element) {
@@ -93,10 +93,10 @@ export class ToDoComponent implements OnInit {
     this.LIST[element.id].trash = true;
   }
 
-  todoListControls() {    
+  todoListControls(event) {    
     let element = event.target;
-    // to do: need to address this and check where it is called from
-    let elementJOB; //= element.attributes.job.value; // delete or complete
+    
+    let elementJOB = element.attributes.job.value; // delete or complete
 
     if (elementJOB == "complete") {
       this.completeToDo(element);
@@ -127,9 +127,9 @@ export class ToDoComponent implements OnInit {
         );
         // add this item to local storage
         localStorage.setItem("TODO", JSON.stringify(this.LIST));
-        this.id++;
+        this.id++;        
       }
-      input = "";
+      (<HTMLInputElement>document.getElementById("input")).value = '';
     }
   }
 
