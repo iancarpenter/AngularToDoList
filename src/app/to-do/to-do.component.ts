@@ -10,7 +10,7 @@ export class ToDoComponent implements OnInit {
   clear: HTMLElement;
   dateElement: HTMLElement;
   list: HTMLElement; 
-  input: HTMLElement;
+  // input: HTMLElement;
 
   CHECK = "fa-check-circle";
   UNCHECK = "fa-circle-thin";
@@ -18,22 +18,25 @@ export class ToDoComponent implements OnInit {
 
   LIST = [];
   id: number;
-  
+  data;
+
   constructor() { }
 
-  data = localStorage.getItem("TODO");
+  
 
   ngOnInit(): void {
     
     this.clear = document.querySelector(".clear");
     this.dateElement = document.getElementById("date");
     this.list = document.getElementById("list");
-    this.input = document.getElementById("input");
+    // this.input = document.getElementById("input");
 
     // show todays date
     const options = { weekday: "long", month: "short", day: "numeric" };
     const today = new Date();
     this.dateElement.innerHTML = today.toLocaleDateString("en-UK", options);
+
+    this.data = localStorage.getItem("TODO");
 
     if (this.data) {
       this.LIST = JSON.parse(this.data);
@@ -90,7 +93,7 @@ export class ToDoComponent implements OnInit {
     this.LIST[element.id].trash = true;
   }
 
-  todoListControls() {
+  todoListControls() {    
     let element = event.target;
     // to do: need to address this and check where it is called from
     let elementJOB; //= element.attributes.job.value; // delete or complete
@@ -105,10 +108,12 @@ export class ToDoComponent implements OnInit {
   }
 
 
-  newTodoItem(event) {
+  newTodoItem(event) {    
     if (event.keyCode == 13) {
-      // need to see why the code is complaining about input
-      const toDo = 1 // this.input.value;
+      
+      let input = (<HTMLInputElement>document.getElementById("input")).value;      
+      const toDo = input;
+      
       // call addToDo if the input field has something in it...
       if (toDo) {
         this.addToDo(toDo, this.id, false, false);
@@ -124,7 +129,7 @@ export class ToDoComponent implements OnInit {
         localStorage.setItem("TODO", JSON.stringify(this.LIST));
         this.id++;
       }
-      // this.input.value = "";
+      input = "";
     }
   }
 
