@@ -9,8 +9,7 @@ export class ToDoComponent implements OnInit {
 
   clear: HTMLElement;
   dateElement: HTMLElement;
-  list: HTMLElement; 
-  // input: HTMLElement;
+  list: HTMLElement;   
 
   CHECK = "fa-check-circle";
   UNCHECK = "fa-circle-thin";
@@ -24,11 +23,16 @@ export class ToDoComponent implements OnInit {
 
   ngOnInit(): void {
     
-    this.clear = document.querySelector(".clear");
-    this.dateElement = document.getElementById("date");
-    this.list = document.getElementById("list");    
+    this.getHTMLReferences();    
     
     this.getDate();
+    
+    this.loadToDoList();
+  }
+
+  // recall the todo list if anything is found in the browsers local storage
+  // otherwise set up the variables for a new todo list
+  private loadToDoList() {
 
     this.data = localStorage.getItem("TODO");
 
@@ -36,10 +40,17 @@ export class ToDoComponent implements OnInit {
       this.LIST = JSON.parse(this.data);
       this.id = this.LIST.length; // set the id to the last one in the list
       this.loadList(this.LIST);
-    } else {
+    }
+    else {
       this.LIST = [];
       this.id = 0;
     }
+  }
+
+  private getHTMLReferences() {
+    this.clear = document.querySelector(".clear");
+    this.dateElement = document.getElementById("date");
+    this.list = document.getElementById("list");
   }
 
   private getDate() {
