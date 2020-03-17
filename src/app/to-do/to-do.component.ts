@@ -22,19 +22,13 @@ export class ToDoComponent implements OnInit {
 
   constructor() { }
 
-  
-
   ngOnInit(): void {
     
     this.clear = document.querySelector(".clear");
     this.dateElement = document.getElementById("date");
-    this.list = document.getElementById("list");
-    // this.input = document.getElementById("input");
-
-    // show todays date
-    const options = { weekday: "long", month: "short", day: "numeric" };
-    const today = new Date();
-    this.dateElement.innerHTML = today.toLocaleDateString("en-UK", options);
+    this.list = document.getElementById("list");    
+    
+    this.getDate();
 
     this.data = localStorage.getItem("TODO");
 
@@ -46,6 +40,12 @@ export class ToDoComponent implements OnInit {
       this.LIST = [];
       this.id = 0;
     }
+  }
+
+  private getDate() {
+    const options = { weekday: "long", month: "short", day: "numeric" };
+    const today = new Date();
+    this.dateElement.innerHTML = today.toLocaleDateString("en-UK", options);
   }
 
   // load the items into the user interface
