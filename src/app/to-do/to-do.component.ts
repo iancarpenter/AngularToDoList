@@ -15,9 +15,9 @@ export class ToDoComponent implements OnInit {
   UNCHECK = "fa-circle-thin";
   LINE_THROUGH = "lineThrough";
 
-  LIST = [];
+  LIST: { name: string; id: number; done: boolean; trash: boolean; }[];
   id: number;
-  data;
+  data: string;
 
   constructor() { }
 
@@ -28,6 +28,18 @@ export class ToDoComponent implements OnInit {
     this.getDate();
     
     this.loadToDoList();
+  }
+
+  private getHTMLReferences() {
+    this.clear = document.querySelector(".clear");
+    this.dateElement = document.getElementById("date");
+    this.list = document.getElementById("list");
+  }
+
+  private getDate() {
+    const options = { weekday: "long", month: "short", day: "numeric" };
+    const today = new Date();
+    this.dateElement.innerHTML = today.toLocaleDateString("en-UK", options);
   }
 
   // recall the todo list if anything is found in the browsers local storage
@@ -46,21 +58,10 @@ export class ToDoComponent implements OnInit {
       this.id = 0;
     }
   }
-
-  private getHTMLReferences() {
-    this.clear = document.querySelector(".clear");
-    this.dateElement = document.getElementById("date");
-    this.list = document.getElementById("list");
-  }
-
-  private getDate() {
-    const options = { weekday: "long", month: "short", day: "numeric" };
-    const today = new Date();
-    this.dateElement.innerHTML = today.toLocaleDateString("en-UK", options);
-  }
+  
 
   // load the items into the user interface
-  loadList(array) {
+  loadList(array: any[]) {      
     // see https://stackoverflow.com/q/43724426/55640  
     array.forEach((item) => {      
       this.addToDo(item.name, item.id, item.done, item.trash);
@@ -74,7 +75,7 @@ export class ToDoComponent implements OnInit {
     location.reload();
   }
 
-  addToDo(toDo, id, done, trash) {
+  addToDo(toDo: string, id: number, done: boolean, trash: boolean) {
 
     if (trash) {
       return;
@@ -94,19 +95,20 @@ export class ToDoComponent implements OnInit {
     this.list.insertAdjacentHTML(position, text);
   }
 
-  completeToDo(element) {
+  completeToDo(element: HTMLElement) {
     element.classList.toggle(this.CHECK);
     element.classList.toggle(this.UNCHECK);
     element.parentNode.querySelector(".text").classList.toggle(this.LINE_THROUGH);
     this.LIST[element.id].done = this.LIST[element.id].done ? false : true;
   }
 
-  removeToDo(element) {
+  removeToDo(element: HTMLElement) {
     element.parentNode.parentNode.removeChild(element.parentNode);
     this.LIST[element.id].trash = true;
   }
 
-  todoListControls(event) {    
+  todoListControls(event: { target: any; }) {    
+      
     let element = event.target;
     
     let elementJOB = element.attributes.job.value; // delete or complete
