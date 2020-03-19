@@ -96,30 +96,48 @@ export class ToDoComponent implements OnInit {
   }
 
   completeToDo(element: HTMLElement) {
+    
     element.classList.toggle(this.CHECK);
+    
     element.classList.toggle(this.UNCHECK);
+    
     element.parentNode.querySelector(".text").classList.toggle(this.LINE_THROUGH);
+    
     this.LIST[element.id].done = this.LIST[element.id].done ? false : true;
+
+    // update the local storage to reflect that the item has been marked as complete
+    localStorage.setItem("TODO", JSON.stringify(this.LIST));
+
   }
 
   removeToDo(element: HTMLElement) {
-    element.parentNode.parentNode.removeChild(element.parentNode);
-    this.LIST[element.id].trash = true;
-  }
-
-  todoListControls(event: { target: any; }) {    
-      
-    let element = event.target;
     
-    let elementJOB = element.attributes.job.value; // delete or complete
-
+    element.parentNode.parentNode.removeChild(element.parentNode);
+    
+    this.LIST[element.id].trash = true;
+    
+    // update the local storage to reflect that the item has been deleted
+    localStorage.setItem("TODO", JSON.stringify(this.LIST));
+  
+  }
+  
+  // Handles when a user completes or deletes a todo item  
+  todoListControls(event: MouseEvent) {        
+    
+    // get the element which the user clicked on
+    const element = event.target as HTMLUListElement;
+    
+    // the value of the job attribute. 
+    // This attribute is created by the method addToDo and can have the value
+    // complete or delete          
+    const elementJOB = element.attributes[1].value;
+    
+    // route what the user has selected to the appropriate method
     if (elementJOB == "complete") {
       this.completeToDo(element);
     } else if (elementJOB == "delete") {
       this.removeToDo(element)
-    }
-    // add item to local storage
-    localStorage.setItem("TODO", JSON.stringify(this.LIST));
+    }        
   }
 
 
