@@ -7,55 +7,47 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ToDoComponent implements OnInit {
 
-  clear: HTMLElement;
-  dateElement: HTMLElement;
-  list: HTMLElement;
+  check = "fa-check-circle";
+  uncheck = "fa-circle-thin";
+  line_through = "lineThrough";
 
-  CHECK = "fa-check-circle";
-  UNCHECK = "fa-circle-thin";
-  LINE_THROUGH = "lineThrough";
-
-  LIST: { name: string; id: number; done: boolean; trash: boolean; }[];
-  id: number;
-  data: string;
-
+  toDoList: { name: string; id: number; done: boolean; trash: boolean; }[];
+  toDoID: number;
+  
   constructor() { }
 
   ngOnInit(): void {
 
-    this.getHTMLReferences();
-
-    this.getDate();
+    this.displayDate();
 
     this.loadToDoList();
   }
 
-  private getHTMLReferences() {
-    this.clear = document.querySelector(".clear");
-    this.dateElement = document.getElementById("date");
-    this.list = document.getElementById("list");
-  }
+  // Display the date such as Friday, Mar 20, 2020
+  private displayDate() {
 
-  private getDate() {
-    const options = { weekday: "long", month: "short", day: "numeric" };
+    const options = { weekday: "long", month: "short", day: "numeric", year: "numeric" };
+
     const today = new Date();
-    this.dateElement.innerHTML = today.toLocaleDateString("en-UK", options);
+
+    (<HTMLElement>document.getElementById("date")).innerHTML = today.toLocaleDateString("en-UK", options);
+
   }
 
   // recall the todo list if anything is found in the browsers local storage
   // otherwise set up the variables for a new todo list
   private loadToDoList() {
 
-    this.data = localStorage.getItem("TODO");
+    const data = localStorage.getItem("TODO");
 
-    if (this.data) {
-      this.LIST = JSON.parse(this.data);
-      this.id = this.LIST.length; // set the id to the last one in the list
-      this.loadList(this.LIST);
+    if (data) {
+      this.toDoList = JSON.parse(data);
+      this.toDoID = this.toDoList.length; // set the id to the last one in the list
+      this.loadList(this.toDoList);
     }
     else {
-      this.LIST = [];
-      this.id = 0;
+      this.toDoList = [];
+      this.toDoID = 0;
     }
   }
 
@@ -68,22 +60,17 @@ export class ToDoComponent implements OnInit {
     });
 
   }
-
-  // called the button that looks like a refresh button (not the browser refresh button)
-  clearLocalStorage() {
-    localStorage.clear();
-    location.reload();
-  }
-
+  
+  // needs refactoring
   addToDo(toDo: string, id: number, done: boolean, trash: boolean) {
 
     if (trash) {
       return;
     }
 
-    const DONE = done ? this.CHECK : this.UNCHECK;
+    const DONE = done ? this.check : this.uncheck;
 
-    const LINE = done ? this.LINE_THROUGH : "";
+    const LINE = done ? this.line_through : "";
 
     const text = `<li class="item">
                      <i class="fa ${DONE} co" job="complete" id="${id}"></i>
@@ -92,10 +79,36 @@ export class ToDoComponent implements OnInit {
                   </li>`;
 
     const position = "beforeend";
-    this.list.insertAdjacentHTML(position, text);
+    const toDolistPosition = document.getElementById("list");
+    toDolistPosition.insertAdjacentHTML(position, text);
   }
+  
+  // needs refactoring
+  completeToDo(element: HTMLElement) {
 
+    element.classList.toggle(this.check);
 
+    element.classList.toggle(this.uncheck);
+
+    element.parentNode.querySelector(".text").classList.toggle(this.line_through);
+
+    this.toDoList[element.id].done = this.toDoList[element.id].done ? false : true;
+
+    // update the local storage to reflect that the item has been marked as complete
+    localStorage.setItem("TODO", JSON.stringify(this.toDoList));
+
+  }
+    
+  removeToDo(element: HTMLElement) {
+
+    element.parentNode.parentNode.removeChild(element.parentNode);
+
+    this.toDoList[element.id].trash = true;
+
+    // update the local storage to reflect that the item has been deleted
+    localStorage.setItem("TODO", JSON.stringify(this.toDoList));
+
+  }
 
   // Handles when a user completes or deletes a todo item  
   todoListControls(event: MouseEvent) {
@@ -116,72 +129,36 @@ export class ToDoComponent implements OnInit {
     }
   }
 
-  completeToDo(element: HTMLElement) {
-
-    element.classList.toggle(this.CHECK);
-
-    element.classList.toggle(this.UNCHECK);
-
-    element.parentNode.querySelector(".text").classList.toggle(this.LINE_THROUGH);
-
-    this.LIST[element.id].done = this.LIST[element.id].done ? false : true;
-
-    // update the local storage to reflect that the item has been marked as complete
-    localStorage.setItem("TODO", JSON.stringify(this.LIST));
-
-  }
-
-  removeToDo(element: HTMLElement) {
-
-    element.parentNode.parentNode.removeChild(element.parentNode);
-
-    this.LIST[element.id].trash = true;
-
-    // update the local storage to reflect that the item has been deleted
-    localStorage.setItem("TODO", JSON.stringify(this.LIST));
-
-  }
-
-  // The user creates a new item todo
-  newTodoItem(event: KeyboardEvent) {
-    // only create the item when the user presses enter
+  // needs further refactoring
+  newTodoItem(event) {
     if (event.keyCode == 13) {
-      
-      // get the text of the todo item
-      let toDo = (<HTMLInputElement>document.getElementById("input")).value;
-            
+
+      let input = (<HTMLInputElement>document.getElementById("input")).value;
+      const toDo = input;
+
       // call addToDo if the input field has something in it...
       if (toDo) {
-      
-        this.addToDo(toDo, this.id, false, false);
-      
-        this.addToDoItemToLocalStorage(toDo);
-                        
+        this.addToDo(toDo, this.toDoID, false, false);
+        this.toDoList.push(
+          {
+            name: toDo,
+            id: this.toDoID,
+            done: false,
+            trash: false
+          }
+        );
+        // add this item to local storage
+        localStorage.setItem("TODO", JSON.stringify(this.toDoList));
+        this.toDoID++;
       }
-      
-      this.clearToDoInput();
-      
+      (<HTMLInputElement>document.getElementById("input")).value = '';
     }
   }
-  
-  // Save the todo item to the browsers local storage 
-  private addToDoItemToLocalStorage(toDo: string) {
-    
-    this.LIST.push({
-      name: toDo,
-      id: this.id,
-      done: false,
-      trash: false
-    });
 
-    localStorage.setItem("TODO", JSON.stringify(this.LIST));
-    this.id++;
-
+  // called the button that looks like a refresh button (not the browser refresh button)
+  clearLocalStorage() {
+    localStorage.clear();
+    location.reload();
   }
 
-  private clearToDoInput() {
-    (<HTMLInputElement>document.getElementById("input")).value = '';
-  }
-
-  
 }
