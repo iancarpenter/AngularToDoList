@@ -52,37 +52,56 @@ export class ToDoComponent implements OnInit {
   }
 
 
-  // load the items into the user interface
+  // load the items that the user has not deleted into the user interface
+  // When the user deletes an item nothing is removed from the toDoList array just the trash flag is set
   loadList(array: any[]) {
     // see https://stackoverflow.com/q/43724426/55640  
     array.forEach((item) => {
-      this.addToDo(item.name, item.id, item.done, item.trash);
+      if (!item.trash) {
+        this.addToDo(item.name, item.id, item.done, item.trash);
+      }      
     });
 
   }
   
-  // needs refactoring
-  addToDo(toDo: string, id: number, done: boolean, trash: boolean) {
+  // Display the todo list
+  addToDo(toDo: string, id: number, done: boolean, trash: boolean) {        
+    const { tick, strikeThrough } = this.formatCompletedItem(done);
 
-    if (trash) {
-      return;
-    }
+    const text = this.toDoliElement(tick, id, strikeThrough, toDo);
+    
+    this.displayToDoItemOnPage(text);  
+  }
 
-    const DONE = done ? this.check : this.uncheck;
+  
+  // completed items are displayed with a tick and strikethrough
+  private formatCompletedItem(done: boolean) {
+    const tick = done ? this.check : this.uncheck;
 
-    const LINE = done ? this.line_through : "";
-
-    const text = `<li class="item">
-                     <i class="fa ${DONE} co" job="complete" id="${id}"></i>
-                     <p class="text ${LINE}"> ${toDo}</p>
-                     <i class="fa fa-trash-o de" job="delete" id="${id}"></i>
-                  </li>`;
-
-    const position = "beforeend";
-    const toDolistPosition = document.getElementById("list");
-    toDolistPosition.insertAdjacentHTML(position, text);
+    const strikeThrough = done ? this.line_through : "";
+    
+    return { tick, strikeThrough };
   }
   
+  // Return a HTML li element containing the to do item, the tick and strikethrough attributes 
+  // are set if the to do has been completed
+  private toDoliElement(tick: string, id: number, strikeThrough: string, toDo: string) {
+    return `<li class="item">
+                     <i class="fa ${tick} co" job="complete" id="${id}"></i>
+                     <p class="text ${strikeThrough}"> ${toDo}</p>
+                     <i class="fa fa-trash-o de" job="delete" id="${id}"></i>
+                  </li>`;
+  }
+  
+  // Insert the new item at the bottom of the UL element
+  private displayToDoItemOnPage(text: string) {    
+    const position = "beforeend";
+    
+    const toDolistPosition = document.getElementById("list");
+    
+    toDolistPosition.insertAdjacentHTML(position, text);
+  }
+
   // needs refactoring
   completeToDo(element: HTMLElement) {
 
