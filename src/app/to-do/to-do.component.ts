@@ -9,7 +9,7 @@ export class ToDoComponent implements OnInit {
 
   clear: HTMLElement;
   dateElement: HTMLElement;
-  list: HTMLElement;   
+  list: HTMLElement;
 
   CHECK = "fa-check-circle";
   UNCHECK = "fa-circle-thin";
@@ -22,11 +22,11 @@ export class ToDoComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    
-    this.getHTMLReferences();    
-    
+
+    this.getHTMLReferences();
+
     this.getDate();
-    
+
     this.loadToDoList();
   }
 
@@ -58,15 +58,15 @@ export class ToDoComponent implements OnInit {
       this.id = 0;
     }
   }
-  
+
 
   // load the items into the user interface
-  loadList(array: any[]) {      
+  loadList(array: any[]) {
     // see https://stackoverflow.com/q/43724426/55640  
-    array.forEach((item) => {      
+    array.forEach((item) => {
       this.addToDo(item.name, item.id, item.done, item.trash);
     });
-    
+
   }
 
   // called the button that looks like a refresh button (not the browser refresh button)
@@ -95,14 +95,35 @@ export class ToDoComponent implements OnInit {
     this.list.insertAdjacentHTML(position, text);
   }
 
+
+
+  // Handles when a user completes or deletes a todo item  
+  todoListControls(event: MouseEvent) {
+
+    // get the element which the user clicked on
+    const element = event.target as HTMLUListElement;
+
+    // the value of the job attribute. 
+    // This attribute is created by the method addToDo and can have the value
+    // complete or delete          
+    const elementJOB = element.attributes[1].value;
+
+    // route what the user has selected to the appropriate method
+    if (elementJOB == "complete") {
+      this.completeToDo(element);
+    } else if (elementJOB == "delete") {
+      this.removeToDo(element)
+    }
+  }
+
   completeToDo(element: HTMLElement) {
-    
+
     element.classList.toggle(this.CHECK);
-    
+
     element.classList.toggle(this.UNCHECK);
-    
+
     element.parentNode.querySelector(".text").classList.toggle(this.LINE_THROUGH);
-    
+
     this.LIST[element.id].done = this.LIST[element.id].done ? false : true;
 
     // update the local storage to reflect that the item has been marked as complete
@@ -111,59 +132,56 @@ export class ToDoComponent implements OnInit {
   }
 
   removeToDo(element: HTMLElement) {
-    
+
     element.parentNode.parentNode.removeChild(element.parentNode);
-    
+
     this.LIST[element.id].trash = true;
-    
+
     // update the local storage to reflect that the item has been deleted
     localStorage.setItem("TODO", JSON.stringify(this.LIST));
-  
-  }
-  
-  // Handles when a user completes or deletes a todo item  
-  todoListControls(event: MouseEvent) {        
-    
-    // get the element which the user clicked on
-    const element = event.target as HTMLUListElement;
-    
-    // the value of the job attribute. 
-    // This attribute is created by the method addToDo and can have the value
-    // complete or delete          
-    const elementJOB = element.attributes[1].value;
-    
-    // route what the user has selected to the appropriate method
-    if (elementJOB == "complete") {
-      this.completeToDo(element);
-    } else if (elementJOB == "delete") {
-      this.removeToDo(element)
-    }        
+
   }
 
-
-  newTodoItem(event) {    
+  // The user creates a new item todo
+  newTodoItem(event: KeyboardEvent) {
+    // only create the item when the user presses enter
     if (event.keyCode == 13) {
       
-      let input = (<HTMLInputElement>document.getElementById("input")).value;      
-      const toDo = input;
-      
+      // get the text of the todo item
+      let toDo = (<HTMLInputElement>document.getElementById("input")).value;
+            
       // call addToDo if the input field has something in it...
       if (toDo) {
+      
         this.addToDo(toDo, this.id, false, false);
-        this.LIST.push(
-          {
-            name: toDo,
-            id: this.id,
-            done: false,
-            trash: false
-          }
-        );
-        // add this item to local storage
-        localStorage.setItem("TODO", JSON.stringify(this.LIST));
-        this.id++;        
+      
+        this.addToDoItemToLocalStorage(toDo);
+                        
       }
-      (<HTMLInputElement>document.getElementById("input")).value = '';
+      
+      this.clearToDoInput();
+      
     }
   }
+  
+  // Save the todo item to the browsers local storage 
+  private addToDoItemToLocalStorage(toDo: string) {
+    
+    this.LIST.push({
+      name: toDo,
+      id: this.id,
+      done: false,
+      trash: false
+    });
 
+    localStorage.setItem("TODO", JSON.stringify(this.LIST));
+    this.id++;
+
+  }
+
+  private clearToDoInput() {
+    (<HTMLInputElement>document.getElementById("input")).value = '';
+  }
+
+  
 }
