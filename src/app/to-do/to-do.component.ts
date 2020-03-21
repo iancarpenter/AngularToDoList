@@ -102,8 +102,8 @@ export class ToDoComponent implements OnInit {
     toDolistPosition.insertAdjacentHTML(position, text);
   }
 
-  // needs refactoring
-  completeToDo(element: HTMLElement) {
+  // add or removes the styles used to show if the to do item is complete 
+  toggleComplete(element: HTMLElement) {
 
     element.classList.toggle(this.check);
 
@@ -111,22 +111,18 @@ export class ToDoComponent implements OnInit {
 
     element.parentNode.querySelector(".text").classList.toggle(this.line_through);
 
-    this.toDoList[element.id].done = this.toDoList[element.id].done ? false : true;
-
-    // update the local storage to reflect that the item has been marked as complete
-    localStorage.setItem("TODO", JSON.stringify(this.toDoList));
+    this.toDoList[element.id].done = this.toDoList[element.id].done ? false : true;      
 
   }
-    
-  removeToDo(element: HTMLElement) {
+  
+  // when the user deletes a to do item, the item is not removed from the list
+  // but the trash property is set to true which stops it from being displayed
+  removeToDoItem(element: HTMLElement) {
 
     element.parentNode.parentNode.removeChild(element.parentNode);
 
-    this.toDoList[element.id].trash = true;
-
-    // update the local storage to reflect that the item has been deleted
-    localStorage.setItem("TODO", JSON.stringify(this.toDoList));
-
+    this.toDoList[element.id].trash = true;          
+    
   }
 
   // Handles when a user completes or deletes a todo item  
@@ -142,10 +138,16 @@ export class ToDoComponent implements OnInit {
 
     // route what the user has selected to the appropriate method
     if (elementJOB == "complete") {
-      this.completeToDo(element);
+      this.toggleComplete(element);    
+      this.addToLocalStorage();
     } else if (elementJOB == "delete") {
-      this.removeToDo(element)
+      this.removeToDoItem(element);      
+      this.addToLocalStorage();
     }
+  }
+
+  private addToLocalStorage() {
+    localStorage.setItem("TODO", JSON.stringify(this.toDoList));
   }
 
   // needs further refactoring
@@ -166,8 +168,7 @@ export class ToDoComponent implements OnInit {
             trash: false
           }
         );
-        // add this item to local storage
-        localStorage.setItem("TODO", JSON.stringify(this.toDoList));
+        this.addToLocalStorage();
         this.toDoID++;
       }
       (<HTMLInputElement>document.getElementById("input")).value = '';
