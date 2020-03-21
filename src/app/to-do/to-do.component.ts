@@ -147,7 +147,7 @@ export class ToDoComponent implements OnInit {
   }
 
   // Create a new to do item when the user presses the enter key
-  addAToDo(event) {
+  addAToDo(event: KeyboardEvent) {
 
     const enterKey = 13;
 
