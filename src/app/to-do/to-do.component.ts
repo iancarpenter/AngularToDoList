@@ -146,23 +146,21 @@ export class ToDoComponent implements OnInit {
     }
   }
 
-  private addToLocalStorage() {
-    localStorage.setItem("TODO", JSON.stringify(this.toDoList));
-  }
+  // Create a new to do item when the user presses the enter key
+  addAToDo(event) {
 
-  // needs further refactoring
-  newTodoItem(event) {
-    if (event.keyCode == 13) {
+    const enterKey = 13;
 
-      let input = (<HTMLInputElement>document.getElementById("input")).value;
-      const toDo = input;
-
-      // call addToDo if the input field has something in it...
-      if (toDo) {
-        this.addToDo(toDo, this.toDoID, false, false);
+    if (event.keyCode == enterKey) {      
+      // get the the new to do item
+      let toDoItem = (<HTMLInputElement>document.getElementById("input")).value;          
+      // If the user has entered something call the methods to display this item 
+      // and add it to the list of to do items
+      if (toDoItem) {
+        this.addToDo(toDoItem, this.toDoID, false, false);
         this.toDoList.push(
           {
-            name: toDo,
+            name: toDoItem,
             id: this.toDoID,
             done: false,
             trash: false
@@ -173,6 +171,11 @@ export class ToDoComponent implements OnInit {
       }
       (<HTMLInputElement>document.getElementById("input")).value = '';
     }
+  }
+  
+  // save the updated list of to do items to the browsers storage
+  private addToLocalStorage() {
+    localStorage.setItem("TODO", JSON.stringify(this.toDoList));
   }
 
   // called the button that looks like a refresh button (not the browser refresh button)
